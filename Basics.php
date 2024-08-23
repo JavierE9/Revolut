@@ -5,7 +5,7 @@ TEST CARD: 4929420573595709
 ****** TENDRAS QUE CAMBIAR: CURLOPT_URL , Authorization: Bearer  y locale ************
 
 ^^ 
-POR ORDEN I FUNCIONES: CREACION TOKEN, CREAR CUSTOMERS, MOSTRAR CUSTOMER, REALIZAR PAGO,  MOSTRAR TRAJETAS
+POR ORDEN I FUNCIONES: CREACION TOKEN, CREAR CUSTOMERS, MOSTRAR CUSTOMER, REALIZAR PAGO,  MOSTRAR TRAJETAS, MOSTRAR PAGO
 
 <?php
 $curl = curl_init();
@@ -550,5 +550,79 @@ echo "<hr>";
 }
 
 
+
+?>
+<?php
+
+$ORDER_ID =  "65b5533c-8035-a0f3-ab5e-ffef8620482d";
+
+$curl = curl_init();
+
+curl_setopt_array($curl, array(
+  CURLOPT_URL => 'https://sandbox-merchant.revolut.com/api/orders/'.$ORDER_ID,
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_ENCODING => '',
+  CURLOPT_MAXREDIRS => 10,
+  CURLOPT_TIMEOUT => 0,
+  CURLOPT_FOLLOWLOCATION => true,
+  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+  CURLOPT_CUSTOMREQUEST => 'GET',
+  CURLOPT_HTTPHEADER => array(
+    'Accept: application/json',
+    'Revolut-Api-Version: 2023-09-01',
+    'Authorization: Bearer sk_tFOc5pnRp9NP.............................................'
+  ),
+));
+
+echo $response = curl_exec($curl);
+echo "<hr>";
+curl_close($curl);
+$arrayFromJson = json_decode($response, true);
+$umbral = 3;
+if (count($arrayFromJson) > $umbral) {
+$state = $arrayFromJson["state"];
+$created_at_order = $arrayFromJson["created_at"];
+$created_at_order = date('Y-m-d', strtotime($created_at_order));
+$updated_at_order = $arrayFromJson["updated_at"];
+$updated_at_order = date('Y-m-d', strtotime($updated_at_order));
+$amount = $arrayFromJson["amount"] / 100;
+$currency = $arrayFromJson["currency"];
+$ID_payments = $arrayFromJson["payments"][0]['id'];
+$Currency_payments = $arrayFromJson["payments"][0]['currency'];
+$Amount_payments = $arrayFromJson["payments"][0]['currency'];
+$State_payments = $arrayFromJson["payments"][0]['state'];
+$created_at_order_payments = $arrayFromJson["payments"][0]["created_at"];
+$created_at_order_payments  = date('Y-m-d', strtotime($created_at_order_payments ));
+$updated_at_order_payments  = $arrayFromJson["payments"][0]["updated_at"];
+$updated_at_order_payments  = date('Y-m-d', strtotime($updated_at_order_payments ));
+$settled_amount = $arrayFromJson["payments"][0]["settled_amount"] / 100;
+
+
+$Customer_id = $arrayFromJson["customer"]["id"];
+$Customer_email = $arrayFromJson["customer"]["email"];
+
+if($state === 'completed' ){
+echo "<hr>ÉXITO EN LA TRANSACCION <br>";
+echo "LA ORDEN SE HA CREADO: ".$created_at_order."<br>";
+echo "LA ORDEN SE HA ACTUALIZADO: ".$updated_at_order."<br>";
+echo "EL DINERO TOTAL: ".$amount."<br>";
+echo "LA MONEDA ES: ".$currency."<br>";
+echo "LA ID DEL PAYMENT ES: ".$ID_payments."<br>";
+echo "LA MONEDA DEL PAYMENT ES: ".$Currency_payments."<br>";
+echo "EL DINERO DEL PAYMENT ES: ".$Amount_payments."<br>";
+echo "EL ESTADO DEL PAYMENT ES: ".$State_payments."<br>";
+echo "LA ORDEN SE HA CREADO: ".$created_at_order_payments."<br>";
+echo "LA ORDEN SE HA ACTUALIZADO: ".$updated_at_order_payments."<br>";
+echo "EL DINERO NETO ES: ".$settled_amount."<br>";
+echo "EL CUSTOMER ID: ".$Customer_id."<br>";
+echo "EL CUSTOMER EMAIL: ".$Customer_email."<br>";
+}else{
+echo "NO ESTA COMPLETA LA TRANSACCION";
+}
+
+} else {
+
+    echo "ERROR.";
+}
 
 ?>
